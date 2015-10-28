@@ -3,12 +3,12 @@
   Javascript WeakAuthentication Class for ZetaPush
   Grégory Houllier - 2015
 */
-import zp from '../zetapush';
+import zp from '../zetapush'
 
 export default class SimpleAuthentification {
   constructor(deploymentId) {
     this._deploymentId = deploymentId
-    this._authType = `${zp.getBusinessId()}.${this._deploymentId}.simple`;
+    this._authType = `${zp.getBusinessId()}.${this._deploymentId}.simple`
 
     zp.on('/meta/handshake', (message) {
       if (message.successful) {
@@ -16,7 +16,7 @@ export default class SimpleAuthentification {
         this._token = token
         this._userId = userId
       }
-    });
+    })
   }
   getConnectionData(login, password, resource = null) {
     const action = 'authenticate'

@@ -3,7 +3,7 @@
   Javascript WeakAuthentication Class for ZetaPush
   Grégory Houllier - 2015
 */
-import zp from '../zetapush';
+import zp from '../zetapush'
 
 export default class WeakAuthentification {
   constructor(deploymentId) {
@@ -17,17 +17,17 @@ export default class WeakAuthentification {
         this._token = token
         this._userId = userId
       }
-    });
+    })
 
     zp.on(zp.generateChannel(_deploymentId, 'control'), (message) => {
       if (zp.isConnected(_authType)) {
-        zp.reconnect();
+        zp.reconnect()
       }
     })
 
     zp.on(zp.generateChannel(_deploymentId, 'release'), (message) => {
       if (zp.isConnected(_authType)) {
-        zp.reconnect();
+        zp.reconnect()
       }
     })
   }
@@ -44,17 +44,17 @@ export default class WeakAuthentification {
     }
   }
   getUserId() {
-    return this._userId;
+    return this._userId
   }
   getToken() {
-    return this._token;
+    return this._token
   }
   getPublicToken() {
-    return this._publicToken;
+    return this._publicToken
   }
   getQRCodeUrl(publicToken) {
     return `${zp.getRestServerUrl()}/${zp.getBusinessId()}/${this._deploymentId}/weak/qrcode/${publicToken}`
   }
 }
 
-zp.authent.Weak = WeakAuthentification;
+zp.authent.Weak = WeakAuthentification
