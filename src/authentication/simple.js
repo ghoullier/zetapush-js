@@ -2,12 +2,16 @@
   ZetaPush Weak Authentication Class v1.0
   Grégory Houllier - 2015
 */
+
+/**
+ * @class SimpleAuthentification
+ */
 class SimpleAuthentification {
   constructor(deploymentId) {
     this._deploymentId = deploymentId
     this._authType = `${zp.getBusinessId()}.${this._deploymentId}.simple`
 
-    zp.on('/meta/handshake', (message) {
+    zp.on('/meta/handshake', (message) => {
       if (message.successful) {
         const { token, userId } = message.ext.authentication
         this._token = token

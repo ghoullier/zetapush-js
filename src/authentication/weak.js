@@ -2,6 +2,10 @@
   ZetaPush Weak Authentication Class v1.0
   Grégory Houllier - 2015
 */
+
+/**
+ * @class WeakAuthentification
+ */
 class WeakAuthentification {
   constructor(deploymentId) {
     this._deploymentId = deploymentId

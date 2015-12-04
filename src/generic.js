@@ -2,7 +2,11 @@
   ZetaPush Generic Service Class v1.0
   Grégory Houllier - 2015
 */
-class zpGenericService {
+
+/**
+ * @class GenericService
+ */
+class GenericService {
   constructor(deploymentId) {
     this._deploymentId = deploymentId
     this._subscribeKeyArray = []
@@ -26,4 +30,4 @@ class zpGenericService {
   }
 }
 
-zp.service.Generic = zpGenericService
+zp.service.Generic = GenericService

@@ -3837,242 +3837,219 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /*
-  ZetaPush Base Class v1.0
-  Javascript GenericService Class for ZetaPush
+  ZetaPush Generic Service Class v1.0
   Grégory Houllier - 2015
 */
-;(function () {
-  'use strict';
 
-  var zpBase = (function () {
-    function zpBase(deploymentId) {
-      _classCallCheck(this, zpBase);
+/**
+ * @class GenericService
+ */
 
-      this._deploymentId = deploymentId;
-      this._subscribeKeyArray = [];
+var GenericService = (function () {
+  function GenericService(deploymentId) {
+    _classCallCheck(this, GenericService);
+
+    this._deploymentId = deploymentId;
+    this._subscribeKeyArray = [];
+  }
+
+  _createClass(GenericService, [{
+    key: 'on',
+    value: function on(verb, callback) {
+      return zp.on(zp.generateChannel(this._deploymentId, verb), callback);
     }
+  }, {
+    key: 'off',
+    value: function off(value) {
+      return zp.off(value);
+    }
+  }, {
+    key: 'send',
+    value: function send(verb, objectParam) {
+      zp.send(zp.generateChannel(this._deploymentId, verb), objectParam);
+    }
+  }, {
+    key: 'onError',
+    value: function onError(callback) {
+      this._subscribeKeyArray.push(this.on('error', callback));
+    }
+  }, {
+    key: 'releaseService',
+    value: function releaseService() {
+      var _this = this;
 
-    _createClass(zpBase, [{
-      key: 'on',
-      value: function on(verb, callback) {
-        return zp.on(zp.generateChannel(this._deploymentId, verb), callback);
-      }
-    }, {
-      key: 'off',
-      value: function off(value) {
-        return zp.off(value);
-      }
-    }, {
-      key: 'send',
-      value: function send(verb, objectParam) {
-        zp.send(zp.generateChannel(this._deploymentId, verb), objectParam);
-      }
-    }, {
-      key: 'onError',
-      value: function onError(callback) {
-        this._subscribeKeyArray.push(this.on('error', callback));
-      }
-    }, {
-      key: 'releaseService',
-      value: function releaseService() {
-        var _this = this;
+      this._subscribeKeyArray.forEach(function (value, key) {
+        _this.off(value);
+      });
+    }
+  }]);
 
-        this._subscribeKeyArray.forEach(function (value, key) {
-          _this.off(value);
-        });
-      }
-    }]);
+  return GenericService;
+})();
 
-    return zpBase;
-  })();
-
-  var exports = this;
-  exports.zp.service._base = zpBase;
-}).call(window);
+zp.service.Generic = GenericService;
 'use strict';
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /*
-	ZetaPush Generic Service v1.0
-	Javascript Generic Service for ZetaPush
-	Mikael Morvan - 2015
-	*/
+  ZetaPush Weak Authentication Class v1.0
+  Grégory Houllier - 2015
+*/
 
-;(function () {
-	'use strict'
+/**
+ * @class SimpleAuthentification
+ */
 
-	/**
-  * Class for managing Generic Service.
-  *
-  * @class Manages Generic Service for ZetaPush
-  */
-	;
-	function zpGenericService(deploymentId) {
-		this._deploymentId = deploymentId;
-		this._subscribeKeyArray = [];
-	}
+var SimpleAuthentification = (function () {
+  function SimpleAuthentification(deploymentId) {
+    var _this = this;
 
-	zpGenericService.prototype = Object.create(zp.service._base.prototype);
-	var proto = zpGenericService.prototype;
-	var exports = this;
+    _classCallCheck(this, SimpleAuthentification);
 
-	exports.zp.service.Generic = zpGenericService;
-}).call(window);
+    this._deploymentId = deploymentId;
+    this._authType = zp.getBusinessId() + '.' + this._deploymentId + '.simple';
+
+    zp.on('/meta/handshake', function (message) {
+      if (message.successful) {
+        var _message$ext$authenti = message.ext.authentication;
+        var token = _message$ext$authenti.token;
+        var userId = _message$ext$authenti.userId;
+
+        _this._token = token;
+        _this._userId = userId;
+      }
+    });
+  }
+
+  _createClass(SimpleAuthentification, [{
+    key: 'getConnectionData',
+    value: function getConnectionData(login, password) {
+      var resource = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+      var action = 'authenticate';
+      var type = this._authType;
+      var data = { login: login, password: password };
+
+      // If parameters == 2, the first parameter is a connection token
+      if (null === resource) {
+        data = {
+          token: login
+        };
+        resource = password;
+      }
+
+      return {
+        ext: {
+          authentication: { action: action, type: type, resource: resource, data: data }
+        }
+      };
+    }
+  }, {
+    key: 'getUserId',
+    value: function getUserId() {
+      return this._userId;
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      return this._token;
+    }
+  }]);
+
+  return SimpleAuthentification;
+})();
+
+zp.authent.Simple = SimpleAuthentification;
 'use strict';
 
-/*
-	ZetaPush Simple Authentication v1.0
-	Javascript Simple Authentication for ZetaPush
-	Mikael Morvan - 2015
-	*/
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-;(function () {
-	'use strict'
-
-	/**
-  * Class for managing Simple Authentication.
-  *
-  * @class Manages Simple Authentication for ZetaPush
-  */
-	;
-	function zpSimpleAuthent(deploymentId) {
-		_deploymentId = deploymentId;
-
-		zp.on('/meta/handshake', function (msg) {
-			if (msg.successful) {
-				_userId = msg.ext.authentication.userId;
-				_token = msg.ext.authentication.token;
-			}
-		});
-	}
-
-	var proto = zpSimpleAuthent.prototype;
-	var exports = this;
-	var _userId, _token, _deploymentId;
-
-	proto.getUserId = function () {
-		return _userId;
-	};
-
-	proto.getToken = function () {
-		return _token;
-	};
-
-	/*
- 	If parameters == 2, the first parameter is a connection token
- 	*/
-	proto.getConnectionData = function (login, password, resource) {
-		var authType = zp.getBusinessId() + '.' + _deploymentId + '.' + 'simple';
-		var loginData;
-		var resourceName;
-
-		if (arguments.length === 2) {
-			loginData = { token: login };
-			resourceName = password;
-		} else {
-			loginData = { "login": login, "password": password };
-			resourceName = resource;
-		}
-
-		var handshakeData = { "ext": {
-				"authentication": {
-					"action": "authenticate",
-					"type": authType,
-					"resource": resourceName,
-					"data": loginData
-				}
-			}
-		};
-		return handshakeData;
-	};
-
-	exports.zp.authent.Simple = zpSimpleAuthent;
-}).call(window);
-'use strict';
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /*
-	ZetaPush Weak Authentication v1.0
-	Javascript Weak Authentication for ZetaPush
-	Mikael Morvan - 2015
-	*/
+  ZetaPush Weak Authentication Class v1.0
+  Grégory Houllier - 2015
+*/
 
-;(function () {
-	'use strict'
+/**
+ * @class WeakAuthentification
+ */
 
-	/**
-  * Class for managing Weak Authentication.
-  *
-  * @class Manages Weak Authentication for ZetaPush
-  */
-	;
-	function zpWeakAuthent(deploymentId) {
-		_deploymentId = deploymentId;
+var WeakAuthentification = (function () {
+  function WeakAuthentification(deploymentId) {
+    var _this = this;
 
-		_authType = zp.getBusinessId() + '.' + _deploymentId + '.' + 'weak';
-		zp.on('/meta/handshake', function (msg) {
-			if (msg.successful) {
-				_token = msg.ext.authentication.token;
-				_publicToken = msg.ext.authentication.publicToken;
-				_userId = msg.ext.authentication.userId;
-			}
-		});
+    _classCallCheck(this, WeakAuthentification);
 
-		zp.on(zp.generateChannel(_deploymentId, 'control'), function (msg) {
-			console.log("control", msg);
-			// Receive a control demand
-			// must reconnect
-			if (zp.isConnected(_authType)) zp.reconnect();
-		});
+    this._deploymentId = deploymentId;
+    this._authType = zp.getBusinessId() + '.' + _deploymentId + '.weak';
 
-		zp.on(zp.generateChannel(_deploymentId, 'release'), function (msg) {
-			console.log("release", msg);
-			// Receive a release control demand
-			// must reconnect
-			if (zp.isConnected(_authType)) zp.reconnect();
-		});
-	}
+    zp.on('/meta/handshake', function (message) {
+      if (message.successful) {
+        var _message$ext$authenti = message.ext.authentication;
+        var publicToken = _message$ext$authenti.publicToken;
+        var token = _message$ext$authenti.token;
+        var userId = _message$ext$authenti.userId;
 
-	var proto = zpWeakAuthent.prototype;
-	var exports = this;
-	// These 2 token are usefull to reconnect with the same Id on the server
-	var _token, _publicToken;
-	// This token is the id of the user
-	var _userId, _authType, _deploymentId;
+        _this._publicToken = publicToken;
+        _this._token = token;
+        _this._userId = userId;
+      }
+    });
 
-	proto.getConnectionData = function (token, resource) {
+    zp.on(zp.generateChannel(_deploymentId, 'control'), function (message) {
+      if (zp.isConnected(_authType)) {
+        zp.reconnect();
+      }
+    });
 
-		var loginData = { "token": token };
+    zp.on(zp.generateChannel(_deploymentId, 'release'), function (message) {
+      if (zp.isConnected(_authType)) {
+        zp.reconnect();
+      }
+    });
+  }
 
-		if (_token) {
-			loginData = { "token": _token };
-		}
+  _createClass(WeakAuthentification, [{
+    key: 'getConnectionData',
+    value: function getConnectionData(token, resource) {
+      var action = 'authenticate';
+      var data = {
+        token: this._token || token
+      };
+      var type = this._authType;
+      return {
+        ext: {
+          authentication: { action: action, type: type, resource: resource, data: data }
+        }
+      };
+    }
+  }, {
+    key: 'getUserId',
+    value: function getUserId() {
+      return this._userId;
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      return this._token;
+    }
+  }, {
+    key: 'getPublicToken',
+    value: function getPublicToken() {
+      return this._publicToken;
+    }
+  }, {
+    key: 'getQRCodeUrl',
+    value: function getQRCodeUrl(publicToken) {
+      return zp.getRestServerUrl() + '/' + zp.getBusinessId() + '/' + this._deploymentId + '/weak/qrcode/' + publicToken;
+    }
+  }]);
 
-		var handshakeData = { "ext": {
-				"authentication": {
-					"action": "authenticate",
-					"type": _authType,
-					"resource": resource,
-					"data": loginData
-				}
-			}
-		};
-		return handshakeData;
-	};
+  return WeakAuthentification;
+})();
 
-	proto.getUserId = function () {
-		return _userId;
-	};
-
-	proto.getToken = function () {
-		return _token;
-	};
-
-	proto.getPublicToken = function () {
-		return _publicToken;
-	};
-
-	proto.getQRCodeUrl = function (publicToken) {
-		return zp.getRestServerUrl() + '/' + zp.getBusinessId() + '/' + _deploymentId + '/weak/qrcode/' + publicToken;
-	};
-
-	exports.zp.authent.Weak = zpWeakAuthent;
-}).call(window);
+zp.authent.Weak = WeakAuthentification;
