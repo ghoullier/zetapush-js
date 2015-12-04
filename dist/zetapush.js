@@ -61,7 +61,6 @@ org.cometd.CometD = function(name)
         requestHeaders: {},
         appendMessageTypeToURL: true,
         autoBatch: false,
-        maxURILength: 2000,
         advice: {
             timeout: 60000,
             interval: 0,
@@ -2130,6 +2129,10 @@ org.cometd.CometD = function(name)
 
     // Use an alias to be less dependent on browser's quirks.
     org.cometd.WebSocket = window.WebSocket;
+
+    // ZetaPush
+    this.notifyListeners= _notifyListeners;
+    // End ZetaPush
 };
 
 org.cometd.Utils = {};
@@ -2949,16 +2952,6 @@ org.cometd.WebSocketTransport = function()
         this._debug('Transport', this.getType(), 'waiting at most', delay, 'ms for messages', messageIds, 'maxNetworkDelay', maxDelay, ', timeouts:', _timeouts);
     }
 
-    _self._notifySuccess = function(fn, messages)
-    {
-        fn.call(this, messages);
-    };
-
-    _self._notifyFailure = function(fn, ws, messages, failure)
-    {
-        fn.call(this, ws, messages, failure);
-    };
-
     function _send(webSocket, envelope, metaConnect)
     {
         try
@@ -2977,7 +2970,7 @@ org.cometd.WebSocketTransport = function()
             // Keep the semantic of calling response callbacks asynchronously after the request.
             this.setTimeout(function()
             {
-                _self._notifyFailure(envelope.onFailure, webSocket, envelope.messages, {
+                envelope.onFailure(webSocket, envelope.messages, {
                     exception: x
                 });
             }, 0);
@@ -3072,7 +3065,7 @@ org.cometd.WebSocketTransport = function()
             this._debug('Transport', this.getType(), 'removed envelope, envelopes', _envelopes);
         }
 
-        this._notifySuccess(_successCallback, messages);
+        _successCallback.call(this, messages);
 
         if (close)
         {
@@ -3106,7 +3099,7 @@ org.cometd.WebSocketTransport = function()
             {
                 _connected = false;
             }
-            this._notifyFailure(envelope.onFailure, webSocket, envelope.messages, {
+            envelope.onFailure(webSocket, envelope.messages, {
                 websocketCode: event.code,
                 reason: event.reason
             });
@@ -3290,7 +3283,158 @@ org.cometd.LongPollingTransport = function()
 };
 
 /*! loglevel - v1.2.0 - https://github.com/pimterry/loglevel - (c) 2014 Tim Perry - licensed MIT */
-!function(a,b){"object"==typeof module&&module.exports&&"function"==typeof require?module.exports=b():"function"==typeof define&&"object"==typeof define.amd?define(b):a.log=b()}(this,function(){function a(a){return typeof console===i?!1:void 0!==console[a]?b(console,a):void 0!==console.log?b(console,"log"):h}function b(a,b){var c=a[b];if("function"==typeof c.bind)return c.bind(a);try{return Function.prototype.bind.call(c,a)}catch(d){return function(){return Function.prototype.apply.apply(c,[a,arguments])}}}function c(a,b){return function(){typeof console!==i&&(d(b),g[a].apply(g,arguments))}}function d(a){for(var b=0;b<j.length;b++){var c=j[b];g[c]=a>b?h:g.methodFactory(c,a)}}function e(a){var b=(j[a]||"silent").toUpperCase();try{return void(window.localStorage.loglevel=b)}catch(c){}try{window.document.cookie="loglevel="+b+";"}catch(c){}}function f(){var a;try{a=window.localStorage.loglevel}catch(b){}if(typeof a===i)try{a=/loglevel=([^;]+)/.exec(window.document.cookie)[1]}catch(b){}void 0===g.levels[a]&&(a="WARN"),g.setLevel(g.levels[a])}var g={},h=function(){},i="undefined",j=["trace","debug","info","warn","error"];g.levels={TRACE:0,DEBUG:1,INFO:2,WARN:3,ERROR:4,SILENT:5},g.methodFactory=function(b,d){return a(b)||c(b,d)},g.setLevel=function(a){if("string"==typeof a&&void 0!==g.levels[a.toUpperCase()]&&(a=g.levels[a.toUpperCase()]),!("number"==typeof a&&a>=0&&a<=g.levels.SILENT))throw"log.setLevel() called with invalid level: "+a;return e(a),d(a),typeof console===i&&a<g.levels.SILENT?"No console available for logging":void 0},g.enableAll=function(){g.setLevel(g.levels.TRACE)},g.disableAll=function(){g.setLevel(g.levels.SILENT)};var k=typeof window!==i?window.log:void 0;return g.noConflict=function(){return typeof window!==i&&window.log===g&&(window.log=k),g},f(),g});
+(function (root, definition) {
+    if (typeof module === 'object' && module.exports && typeof require === 'function') {
+        module.exports = definition();
+    } else if (typeof define === 'function' && typeof define.amd === 'object') {
+        define(definition);
+    } else {
+        root.log = definition();
+    }
+}(this, function () {
+    var self = {};
+    var noop = function() {};
+    var undefinedType = "undefined";
+
+    function realMethod(methodName) {
+        if (typeof console === undefinedType) {
+            return false; // We can't build a real method without a console to log to
+        } else if (console[methodName] !== undefined) {
+            return bindMethod(console, methodName);
+        } else if (console.log !== undefined) {
+            return bindMethod(console, 'log');
+        } else {
+            return noop;
+        }
+    }
+
+    function bindMethod(obj, methodName) {
+        var method = obj[methodName];
+        if (typeof method.bind === 'function') {
+            return method.bind(obj);
+        } else {
+            try {
+                return Function.prototype.bind.call(method, obj);
+            } catch (e) {
+                // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+                return function() {
+                    return Function.prototype.apply.apply(method, [obj, arguments]);
+                };
+            }
+        }
+    }
+
+    function enableLoggingWhenConsoleArrives(methodName, level) {
+        return function () {
+            if (typeof console !== undefinedType) {
+                replaceLoggingMethods(level);
+                self[methodName].apply(self, arguments);
+            }
+        };
+    }
+
+    var logMethods = [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error"
+    ];
+
+    function replaceLoggingMethods(level) {
+        for (var i = 0; i < logMethods.length; i++) {
+            var methodName = logMethods[i];
+            self[methodName] = (i < level) ? noop : self.methodFactory(methodName, level);
+        }
+    }
+
+    function persistLevelIfPossible(levelNum) {
+        var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+
+        // Use localStorage if available
+        try {
+            window.localStorage['loglevel'] = levelName;
+            return;
+        } catch (ignore) {}
+
+        // Use session cookie as fallback
+        try {
+            window.document.cookie = "loglevel=" + levelName + ";";
+        } catch (ignore) {}
+    }
+
+    function loadPersistedLevel() {
+        var storedLevel;
+
+        try {
+            storedLevel = window.localStorage['loglevel'];
+        } catch (ignore) {}
+
+        if (typeof storedLevel === undefinedType) {
+            try {
+                storedLevel = /loglevel=([^;]+)/.exec(window.document.cookie)[1];
+            } catch (ignore) {}
+        }
+        
+        if (self.levels[storedLevel] === undefined) {
+            storedLevel = "WARN";
+        }
+
+        self.setLevel(self.levels[storedLevel]);
+    }
+
+    /*
+     *
+     * Public API
+     *
+     */
+
+    self.levels = { "TRACE": 0, "DEBUG": 1, "INFO": 2, "WARN": 3,
+        "ERROR": 4, "SILENT": 5};
+
+    self.methodFactory = function (methodName, level) {
+        return realMethod(methodName) ||
+               enableLoggingWhenConsoleArrives(methodName, level);
+    };
+
+    self.setLevel = function (level) {
+        if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+            level = self.levels[level.toUpperCase()];
+        }
+        if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+            persistLevelIfPossible(level);
+            replaceLoggingMethods(level);
+            if (typeof console === undefinedType && level < self.levels.SILENT) {
+                return "No console available for logging";
+            }
+        } else {
+            throw "log.setLevel() called with invalid level: " + level;
+        }
+    };
+
+    self.enableAll = function() {
+        self.setLevel(self.levels.TRACE);
+    };
+
+    self.disableAll = function() {
+        self.setLevel(self.levels.SILENT);
+    };
+
+    // Grab the current global log variable in case of overwrite
+    var _log = (typeof window !== undefinedType) ? window.log : undefined;
+    self.noConflict = function() {
+        if (typeof window !== undefinedType &&
+               window.log === self) {
+            window.log = _log;
+        }
+
+        return self;
+    };
+
+    loadPersistedLevel();
+    return self;
+}));
+
 /*! qwest 1.5.11 (https://github.com/pyrsmk/qwest) */
 /*
 	Modified by Mikael Morvan for ZetaPush - 2015-5-7

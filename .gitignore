@@ -1,12 +1,1 @@
-.DS_Store
-Thumbs.db
-
-node_modules
-bower_components
-
-test
-
-*.sublime-project
-*.sublime-workspace
-deploy.sh
-
+node_modules/

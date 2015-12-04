@@ -1,11 +1,13 @@
 import "babel-polyfill"
 
 import gulp from "gulp"
+import babel from "gulp-babel"
 import rename from "gulp-rename"
 import uglify from "gulp-uglify"
 import concat from "gulp-concat"
 
-const COMETD_PATH = 'bower_components/cometd-jquery/cometd-javascript/common/src/main/js/org/cometd/';
+const COMETD_PATH = 'vendor/cometd/';
+const LOGLEVEL_PATH = 'vendor/loglevel/';
 
 const VENDOR_FILES = [
   `${COMETD_PATH}cometd-namespace.js`,
@@ -17,7 +19,7 @@ const VENDOR_FILES = [
   `${COMETD_PATH}TransportRegistry.js`,
   `${COMETD_PATH}WebSocketTransport.js`,
   `${COMETD_PATH}LongPollingTransport.js`,
-  `bower_components/loglevel/dist/loglevel.min.js`,
+  `${LOGLEVEL_PATH}loglevel.js`,
 ];
 
 const SOURCE_FILES = [
