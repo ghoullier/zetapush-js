@@ -4,12 +4,11 @@
 	Mikael Morvan - March 2015
 */
 
-
 ;(function () {
 	'use strict';
 
 	/**
-	 * Class for managing core functionnalities.     
+	 * Class for managing core functionnalities.
 	 *
 	 * @class ZetaPush Manages core functionnalities
 	 */
@@ -33,7 +32,7 @@
 		{
 			for (var headerName in headers)
 			{
-				headersArray[headerName]= headers[headerName];				
+				headersArray[headerName]= headers[headerName];
 			}
 		}
 	}
@@ -63,15 +62,15 @@
 			.then(
 				packet.onSuccess
 			)
-			.catch(function(e,url){				
+			.catch(function(e,url){
 				var reason="Connection Failed for server " + url;
 				packet.onError(reason, e);
-			})							
+			})
 		};
 
 		return that;
 	}
-	
+
 	// Bind CometD
 	var cometd = new org.cometd.CometD();
 
@@ -86,7 +85,7 @@
 	connected = false,
 	_businessId= null,
 	_clientId= null,
-	_serverUrl= null, 
+	_serverUrl= null,
 	_serverList=[],
 	_debugLevel= null,
 	subscriptions = [];
@@ -106,8 +105,8 @@
 		if (!wasConnected && connected) { // reconnected
 			log.info('connection established');
 			cometd.notifyListeners('/meta/connected', msg);
-			cometd.batch(function(){ 
-				_zp.refresh(); 
+			cometd.batch(function(){
+				_zp.refresh();
 			});
 		} else if (wasConnected && !connected) {
 			log.warn('connection broken');
@@ -125,7 +124,7 @@
 		}
 	});
 
-	cometd.onTransportException= function(_cometd, transport){		
+	cometd.onTransportException= function(_cometd, transport){
 		if (transport==='long-polling'){
 			log.debug('onTransportException for long-polling');
 
@@ -145,10 +144,10 @@
 					url: _serverUrl+'/strd'
 				});
 				log.debug('CometD Url', _serverUrl);
-				setTimeout(function(){ 
+				setTimeout(function(){
 					cometd.handshake(_connectionData);
 				},500);
-				
+
 			}
 
 		}
@@ -158,8 +157,8 @@
 	*/
 	function getServer(businessId, force, apiUrl, callback){
 		// Get the server list from a server
-		
-		var headers=[];		
+
+		var headers=[];
 		headers['Content-Type']= 'application/json;charset=UTF-8';
 		qwest.get(
 			apiUrl + businessId,
@@ -175,7 +174,7 @@
 			data.lastCheck= Date.now();
 			data.lastBusinessId= businessId;
 			var error= null;
-			_serverList= data.servers;						
+			_serverList= data.servers;
 			callback(error, data.servers[Math.floor(Math.random()*data.servers.length)]);
 		})
 		.catch(function(error,url){
@@ -183,11 +182,11 @@
 			callback(error, null);
 		})
 		;
-		
+
 	}
 
 	/*
-		Init ZetaPush with the BusinessId of the user		
+		Init ZetaPush with the BusinessId of the user
 	*/
 	proto.init= function(businessId, debugLevel){
 		_businessId= businessId;
@@ -208,22 +207,22 @@
 		if (proto.isConnected())
 			return;
 
-		if (arguments.length === 1){			
+		if (arguments.length === 1){
 			apiUrl= "http://api.zpush.io/";
 		}
 
 		_connectionData= connectionData;
-		
+
 		/*
 			Get the server Url
 		*/
 
 		getServer(_businessId, false, apiUrl, function(error, serverUrl){
 			_serverUrl= serverUrl;
-				
+
 			if (_debugLevel === 'debug')
-				cometd.websocketEnabled= false;	
-					
+				cometd.websocketEnabled= false;
+
 			cometd.configure({
 				url: _serverUrl+'/strd',
 				logLevel: _debugLevel,
@@ -231,8 +230,8 @@
 				maxBackoff: 500,
 				appendMessageTypeToURL: false
 			});
-			
-			cometd.handshake(connectionData);	
+
+			cometd.handshake(connectionData);
 		});
 
 	};
@@ -278,8 +277,8 @@
 		if (arguments.length== 1){
 			var key= arguments[0];
 		}
-		else if (arguments.length == 2){			
-			var key={};			
+		else if (arguments.length == 2){
+			var key={};
 			key.channel= arguments[0];
 			key.callback= arguments[1];
 			subscriptions.push(key);
@@ -297,7 +296,7 @@
 			cometd.notifyListeners('/meta/error', "Syntax error in the channel name");
 			return null;
 		}
-		
+
 		if (tokens[1]=='service'){
 			key.isService= true;
 
@@ -355,7 +354,7 @@
 		if ((arguments.length== 2) || (arguments.length==1)){
 			evt= arguments[0];
 			sendData= arguments[1];
-		} 
+		}
 		else if ((arguments.length==3) || (arguments.length==4)){
 			evt= proto.generateChannel(businessId, deploymentId, verb);
 			sendData= data;
@@ -371,7 +370,7 @@
 			if (connected){
 				cometd.publish(evt, sendData);
 			}
-		} 
+		}
 		else if (tokens[1]=='meta'){
 			cometd.notifyListeners(evt, sendData);
 		}
@@ -419,7 +418,7 @@
 	/*
 		Refresh subscriptions
 	*/
-	proto.refresh= function() {		
+	proto.refresh= function() {
 		log.debug('refreshing subscriptions');
 		var renew = [];
 		subscriptions.forEach(function(key) {
@@ -436,7 +435,7 @@
 		renew.forEach(function(key) {
 			//proto.on(key.channel, key.callback);
 			proto.on(key);
-		});		
+		});
 	};
 
 	/*
@@ -454,13 +453,13 @@
 		return text;
 	}
 
-		
+
 
 	/*
 		Reconnect
 	*/
 	proto.reconnect= function(){
-		connect(_connectionData);		
+		connect(_connectionData);
 	}
 
 	/*
@@ -471,4 +470,4 @@
 	}
 
 	exports.zp = _zp;
-}.call(this));
+}.call(window));

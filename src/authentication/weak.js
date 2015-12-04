@@ -8,12 +8,12 @@
 	'use strict';
 
 	/**
-	 * Class for managing Weak Authentication.     
+	 * Class for managing Weak Authentication.
 	 *
 	 * @class Manages Weak Authentication for ZetaPush
 	 */
 	function zpWeakAuthent(deploymentId) {
-		_deploymentId= deploymentId;	
+		_deploymentId= deploymentId;
 
 		_authType = zp.getBusinessId() +'.' + _deploymentId + '.' + 'weak';
 		zp.on('/meta/handshake', function(msg){
@@ -22,7 +22,7 @@
 				_publicToken= msg.ext.authentication.publicToken;
 				_userId= msg.ext.authentication.userId;
 			}
-		});	
+		});
 
 		zp.on(zp.generateChannel(_deploymentId,'control'), function(msg){
 			console.log("control", msg);
@@ -39,19 +39,19 @@
 			if (zp.isConnected(_authType))
 				zp.reconnect();
 		});
-	}    
-	
+	}
+
 	var proto = zpWeakAuthent.prototype;
 	var exports = this;
 	// These 2 token are usefull to reconnect with the same Id on the server
 	var _token, _publicToken;
 	// This token is the id of the user
-	var _userId, _authType, _deploymentId;	
+	var _userId, _authType, _deploymentId;
 
 	proto.getConnectionData= function(token, resource){
-		
+
 		var loginData= {"token": token};
-		
+
 		if (_token){
 			loginData= {"token": _token};
 		}
@@ -71,9 +71,9 @@
 	}
 
 	proto.getUserId= function(){
-		return _userId;		
+		return _userId;
 	}
-	
+
 	proto.getToken= function(){
 		return _token;
 	}
@@ -87,5 +87,5 @@
 	}
 
 	exports.zp.authent.Weak = zpWeakAuthent;
-	
-}.call(this));
+
+}.call(window));

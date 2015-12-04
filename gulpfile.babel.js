@@ -20,9 +20,9 @@ const VENDOR_FILES = [
   `${COMETD_PATH}TransportRegistry.js`,
   `${COMETD_PATH}WebSocketTransport.js`,
   `${COMETD_PATH}LongPollingTransport.js`,
+  `${QWEST_PATH}qwest.js`,
   `${LOGLEVEL_PATH}loglevel.js`,
-  `${QWEST_PATH}loglevel.js`,
-];
+]
 
 const SOURCE_FILES = [
   `src/zetapush.js`,
@@ -30,10 +30,11 @@ const SOURCE_FILES = [
   `src/generic.js`,
   `src/authentication/simple.js`,
   `src/authentication/weak.js`
-];
+]
 
 gulp.task('build', () => {
   return gulp.src([...VENDOR_FILES, ...SOURCE_FILES])
+    .pipe(babel())
     .pipe(concat('zetapush.js'))
     .pipe(gulp.dest('dist'))
     .pipe(rename({

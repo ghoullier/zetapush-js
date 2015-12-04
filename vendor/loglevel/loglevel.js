@@ -1,13 +1,13 @@
 /*! loglevel - v1.2.0 - https://github.com/pimterry/loglevel - (c) 2014 Tim Perry - licensed MIT */
 (function (root, definition) {
-    if (typeof module === 'object' && module.exports && typeof require === 'function') {
-        module.exports = definition();
-    } else if (typeof define === 'function' && typeof define.amd === 'object') {
-        define(definition);
-    } else {
+    // if (typeof module === 'object' && module.exports && typeof require === 'function') {
+    //     module.exports = definition();
+    // } else if (typeof define === 'function' && typeof define.amd === 'object') {
+    //     define(definition);
+    // } else {
         root.log = definition();
-    }
-}(this, function () {
+    // }
+}(window, function () {
     var self = {};
     var noop = function() {};
     var undefinedType = "undefined";
@@ -91,7 +91,7 @@
                 storedLevel = /loglevel=([^;]+)/.exec(window.document.cookie)[1];
             } catch (ignore) {}
         }
-        
+
         if (self.levels[storedLevel] === undefined) {
             storedLevel = "WARN";
         }

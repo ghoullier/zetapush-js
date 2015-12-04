@@ -8,12 +8,12 @@
 	'use strict';
 
 	/**
-	 * Base class for all the services.     
+	 * Base class for all the services.
 	 *
 	 * @class Base class
 	 */
 	function zpBase(){
-	}    
+	}
 
 	var proto = zpBase.prototype;
 	var exports = this;
@@ -44,5 +44,5 @@
 	}
 
 	exports.zp.service._base = zpBase;
-	
-}.call(this));
+
+}.call(window));

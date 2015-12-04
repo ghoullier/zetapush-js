@@ -8,12 +8,12 @@
 	'use strict';
 
 	/**
-	 * Class for managing Simple Authentication.     
+	 * Class for managing Simple Authentication.
 	 *
 	 * @class Manages Simple Authentication for ZetaPush
 	 */
 	function zpSimpleAuthent(deploymentId) {
-		_deploymentId= deploymentId;	
+		_deploymentId= deploymentId;
 
 		zp.on('/meta/handshake', function(msg){
 			if (msg.successful){
@@ -22,7 +22,7 @@
 			}
 		});
 	}
-	
+
 	var proto = zpSimpleAuthent.prototype;
 	var exports = this;
 	var _userId, _token, _deploymentId;
@@ -44,7 +44,7 @@
 		var loginData;
 		var resourceName;
 
-		if (arguments.length === 2){		
+		if (arguments.length === 2){
 			loginData={token: login};
 			resourceName= password;
 		} else {
@@ -67,5 +67,5 @@
 	}
 
 	exports.zp.authent.Simple = zpSimpleAuthent;
-	
-}.call(this));
+
+}.call(window));

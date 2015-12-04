@@ -1,3 +1,3 @@
 // Namespaces for the cometd implementation
-this.org = this.org || {};
+window.org = window.org || {};
 org.cometd = {};

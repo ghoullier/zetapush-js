@@ -67,7 +67,7 @@ org.cometd.WebSocketTransport = function()
         var connectTimeout = _cometd.getConfiguration().connectTimeout;
         if (connectTimeout > 0)
         {
-            connectTimer = this.setTimeout(function()
+            connectTimer = setTimeout(function()
             {
                 connectTimer = null;
                 self._debug('Transport', self.getType(), 'timed out while connecting to URL', url, ':', connectTimeout, 'ms');
@@ -175,7 +175,7 @@ org.cometd.WebSocketTransport = function()
                 if (message.id)
                 {
                     messageIds.push(message.id);
-                    _timeouts[message.id] = this.setTimeout(function()
+                    _timeouts[message.id] = setTimeout(function()
                     {
                         self._debug('Transport', self.getType(), 'timing out message', message.id, 'after', delay, 'on', webSocket);
                         var event = { code: 1000, reason: 'Message Timeout' };
@@ -208,7 +208,7 @@ org.cometd.WebSocketTransport = function()
         catch (x)
         {
             // Keep the semantic of calling response callbacks asynchronously after the request.
-            this.setTimeout(function()
+            setTimeout(function()
             {
                 envelope.onFailure(webSocket, envelope.messages, {
                     exception: x
