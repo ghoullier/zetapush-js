@@ -8,6 +8,7 @@ import concat from "gulp-concat"
 
 const COMETD_PATH = 'vendor/cometd/';
 const LOGLEVEL_PATH = 'vendor/loglevel/';
+const QWEST_PATH = 'vendor/qwest/';
 
 const VENDOR_FILES = [
   `${COMETD_PATH}cometd-namespace.js`,
@@ -20,10 +21,10 @@ const VENDOR_FILES = [
   `${COMETD_PATH}WebSocketTransport.js`,
   `${COMETD_PATH}LongPollingTransport.js`,
   `${LOGLEVEL_PATH}loglevel.js`,
+  `${QWEST_PATH}loglevel.js`,
 ];
 
 const SOURCE_FILES = [
-  `src/qwest.js`,
   `src/zetapush.js`,
   `src/_base.js`,
   `src/generic.js`,
