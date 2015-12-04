@@ -1,26 +1,29 @@
 /*
-	ZetaPush Generic Service v1.0
-	Javascript Generic Service for ZetaPush
-	Mikael Morvan - 2015
-	*/
+  ZetaPush Generic Service Class v1.0
+  Grégory Houllier - 2015
+*/
+class zpGenericService {
+  constructor(deploymentId) {
+    this._deploymentId = deploymentId
+    this._subscribeKeyArray = []
+  }
+  on(verb, callback) {
+    return zp.on(zp.generateChannel(this._deploymentId,verb), callback)
+  }
+  off(value) {
+    return zp.off(value)
+  }
+  send(verb, objectParam) {
+    zp.send(zp.generateChannel(this._deploymentId,verb), objectParam)
+  }
+  onError(callback) {
+    this._subscribeKeyArray.push(this.on('error', callback))
+  }
+  releaseService() {
+    this._subscribeKeyArray.forEach((value, key) => {
+      this.off(value);
+    })
+  }
+}
 
-;(function () {
-	'use strict';
-
-	/**
-	 * Class for managing Generic Service.
-	 *
-	 * @class Manages Generic Service for ZetaPush
-	 */
-	function zpGenericService(deploymentId){
-		this._deploymentId= deploymentId;
-		this._subscribeKeyArray=[];
-	}
-
-	zpGenericService.prototype= Object.create(zp.service._base.prototype);
-	var proto = zpGenericService.prototype;
-	var exports = this;
-
-	exports.zp.service.Generic = zpGenericService;
-
-}.call(window));
+zp.service.Generic = zpGenericService

@@ -1,91 +1,57 @@
 /*
-	ZetaPush Weak Authentication v1.0
-	Javascript Weak Authentication for ZetaPush
-	Mikael Morvan - 2015
-	*/
+  ZetaPush Weak Authentication Class v1.0
+  Grégory Houllier - 2015
+*/
+class WeakAuthentification {
+  constructor(deploymentId) {
+    this._deploymentId = deploymentId
+    this._authType = `${zp.getBusinessId()}.${_deploymentId}.weak`
 
-;(function () {
-	'use strict';
+    zp.on('/meta/handshake', (message) => {
+      if (message.successful) {
+        const { publicToken, token, userId } = message.ext.authentication
+        this._publicToken = publicToken
+        this._token = token
+        this._userId = userId
+      }
+    })
 
-	/**
-	 * Class for managing Weak Authentication.
-	 *
-	 * @class Manages Weak Authentication for ZetaPush
-	 */
-	function zpWeakAuthent(deploymentId) {
-		_deploymentId= deploymentId;
+    zp.on(zp.generateChannel(_deploymentId, 'control'), (message) => {
+      if (zp.isConnected(_authType)) {
+        zp.reconnect()
+      }
+    })
 
-		_authType = zp.getBusinessId() +'.' + _deploymentId + '.' + 'weak';
-		zp.on('/meta/handshake', function(msg){
-			if (msg.successful){
-				_token= msg.ext.authentication.token;
-				_publicToken= msg.ext.authentication.publicToken;
-				_userId= msg.ext.authentication.userId;
-			}
-		});
+    zp.on(zp.generateChannel(_deploymentId, 'release'), (message) => {
+      if (zp.isConnected(_authType)) {
+        zp.reconnect()
+      }
+    })
+  }
+  getConnectionData(token, resource){
+    const action = 'authenticate'
+    const data = {
+      token: this._token || token
+    }
+    const type = this._authType
+    return {
+      ext: {
+        authentication: { action, type, resource, data }
+      }
+    }
+  }
+  getUserId() {
+    return this._userId
+  }
+  getToken() {
+    return this._token
+  }
+  getPublicToken() {
+    return this._publicToken
+  }
+  getQRCodeUrl(publicToken) {
+    return `${zp.getRestServerUrl()}/${zp.getBusinessId()}/${this._deploymentId}/weak/qrcode/${publicToken}`
+  }
+}
 
-		zp.on(zp.generateChannel(_deploymentId,'control'), function(msg){
-			console.log("control", msg);
-			// Receive a control demand
-			// must reconnect
-			if (zp.isConnected(_authType))
-				zp.reconnect();
-		});
-
-		zp.on(zp.generateChannel(_deploymentId,'release'), function(msg){
-			console.log("release", msg);
-			// Receive a release control demand
-			// must reconnect
-			if (zp.isConnected(_authType))
-				zp.reconnect();
-		});
-	}
-
-	var proto = zpWeakAuthent.prototype;
-	var exports = this;
-	// These 2 token are usefull to reconnect with the same Id on the server
-	var _token, _publicToken;
-	// This token is the id of the user
-	var _userId, _authType, _deploymentId;
-
-	proto.getConnectionData= function(token, resource){
-
-		var loginData= {"token": token};
-
-		if (_token){
-			loginData= {"token": _token};
-		}
-
-		var handshakeData=
-			{"ext":
-				{
-					"authentication":{
-						"action":"authenticate",
-						"type": _authType,
-						"resource": resource,
-						"data": loginData
-					}
-				}
-			}
-		return handshakeData;
-	}
-
-	proto.getUserId= function(){
-		return _userId;
-	}
-
-	proto.getToken= function(){
-		return _token;
-	}
-
-	proto.getPublicToken= function(){
-		return _publicToken;
-	}
-
-	proto.getQRCodeUrl= function(publicToken){
-		return zp.getRestServerUrl()+'/'+zp.getBusinessId()+'/'+_deploymentId+'/weak/qrcode/'+publicToken;
-	}
-
-	exports.zp.authent.Weak = zpWeakAuthent;
-
-}.call(window));
+zp.authent.Weak = WeakAuthentification

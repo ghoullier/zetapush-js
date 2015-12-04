@@ -26,7 +26,6 @@ const VENDOR_FILES = [
 
 const SOURCE_FILES = [
   `src/zetapush.js`,
-  `src/_base.js`,
   `src/generic.js`,
   `src/authentication/simple.js`,
   `src/authentication/weak.js`

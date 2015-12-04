@@ -3832,52 +3832,62 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 }).call(window);
 'use strict';
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /*
-	ZetaPush Base Class v1.0
-	Javascript Base Class for ZetaPush
-	Mikael Morvan - 2015
+  ZetaPush Base Class v1.0
+  Javascript GenericService Class for ZetaPush
+  Grégory Houllier - 2015
 */
-
 ;(function () {
-	'use strict'
+  'use strict';
 
-	/**
-  * Base class for all the services.
-  *
-  * @class Base class
-  */
-	;
-	function zpBase() {}
+  var zpBase = (function () {
+    function zpBase(deploymentId) {
+      _classCallCheck(this, zpBase);
 
-	var proto = zpBase.prototype;
-	var exports = this;
-	var _deploymentId;
-	var _subscribeKeyArray;
+      this._deploymentId = deploymentId;
+      this._subscribeKeyArray = [];
+    }
 
-	proto.on = function (verb, callback) {
-		return zp.on(zp.generateChannel(this._deploymentId, verb), callback);
-	};
+    _createClass(zpBase, [{
+      key: 'on',
+      value: function on(verb, callback) {
+        return zp.on(zp.generateChannel(this._deploymentId, verb), callback);
+      }
+    }, {
+      key: 'off',
+      value: function off(value) {
+        return zp.off(value);
+      }
+    }, {
+      key: 'send',
+      value: function send(verb, objectParam) {
+        zp.send(zp.generateChannel(this._deploymentId, verb), objectParam);
+      }
+    }, {
+      key: 'onError',
+      value: function onError(callback) {
+        this._subscribeKeyArray.push(this.on('error', callback));
+      }
+    }, {
+      key: 'releaseService',
+      value: function releaseService() {
+        var _this = this;
 
-	proto.off = function (value) {
-		zp.off(value);
-	};
+        this._subscribeKeyArray.forEach(function (value, key) {
+          _this.off(value);
+        });
+      }
+    }]);
 
-	proto.send = function (verb, objectParam) {
-		zp.send(zp.generateChannel(this._deploymentId, verb), objectParam);
-	};
+    return zpBase;
+  })();
 
-	proto.onError = function (callback) {
-		this._subscribeKeyArray.push(this.on('error', callback));
-	};
-
-	proto.releaseService = function () {
-		var that = this;
-		this._subscribeKeyArray.forEach(function (value, key) {
-			that.off(value);
-		});
-	};
-
-	exports.zp.service._base = zpBase;
+  var exports = this;
+  exports.zp.service._base = zpBase;
 }).call(window);
 'use strict';
 
