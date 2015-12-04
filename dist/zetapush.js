@@ -61,6 +61,7 @@ org.cometd.CometD = function(name)
         requestHeaders: {},
         appendMessageTypeToURL: true,
         autoBatch: false,
+        maxURILength: 2000,
         advice: {
             timeout: 60000,
             interval: 0,
@@ -2129,10 +2130,6 @@ org.cometd.CometD = function(name)
 
     // Use an alias to be less dependent on browser's quirks.
     org.cometd.WebSocket = window.WebSocket;
-
-    // ZetaPush
-    this.notifyListeners= _notifyListeners;
-    // End ZetaPush
 };
 
 org.cometd.Utils = {};
@@ -2952,6 +2949,16 @@ org.cometd.WebSocketTransport = function()
         this._debug('Transport', this.getType(), 'waiting at most', delay, 'ms for messages', messageIds, 'maxNetworkDelay', maxDelay, ', timeouts:', _timeouts);
     }
 
+    _self._notifySuccess = function(fn, messages)
+    {
+        fn.call(this, messages);
+    };
+
+    _self._notifyFailure = function(fn, ws, messages, failure)
+    {
+        fn.call(this, ws, messages, failure);
+    };
+
     function _send(webSocket, envelope, metaConnect)
     {
         try
@@ -2970,7 +2977,7 @@ org.cometd.WebSocketTransport = function()
             // Keep the semantic of calling response callbacks asynchronously after the request.
             this.setTimeout(function()
             {
-                envelope.onFailure(webSocket, envelope.messages, {
+                _self._notifyFailure(envelope.onFailure, webSocket, envelope.messages, {
                     exception: x
                 });
             }, 0);
@@ -3065,7 +3072,7 @@ org.cometd.WebSocketTransport = function()
             this._debug('Transport', this.getType(), 'removed envelope, envelopes', _envelopes);
         }
 
-        _successCallback.call(this, messages);
+        this._notifySuccess(_successCallback, messages);
 
         if (close)
         {
@@ -3099,7 +3106,7 @@ org.cometd.WebSocketTransport = function()
             {
                 _connected = false;
             }
-            envelope.onFailure(webSocket, envelope.messages, {
+            this._notifyFailure(envelope.onFailure, webSocket, envelope.messages, {
                 websocketCode: event.code,
                 reason: event.reason
             });
