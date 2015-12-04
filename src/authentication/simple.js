@@ -2,48 +2,49 @@
   ZetaPush Weak Authentication Class v1.0
   Grégory Houllier - 2015
 */
+(function(zp) {
+  /**
+   * @class SimpleAuthentification
+   */
+  class SimpleAuthentification {
+    constructor(deploymentId) {
+      this._deploymentId = deploymentId
+      this._authType = `${zp.getBusinessId()}.${this._deploymentId}.simple`
 
-/**
- * @class SimpleAuthentification
- */
-class SimpleAuthentification {
-  constructor(deploymentId) {
-    this._deploymentId = deploymentId
-    this._authType = `${zp.getBusinessId()}.${this._deploymentId}.simple`
-
-    zp.on('/meta/handshake', (message) => {
-      if (message.successful) {
-        const { token, userId } = message.ext.authentication
-        this._token = token
-        this._userId = userId
-      }
-    })
-  }
-  getConnectionData(login, password, resource = null) {
-    const action = 'authenticate'
-    const type = this._authType
-    let data = { login, password }
-
-    // If parameters == 2, the first parameter is a connection token
-    if (null === resource) {
-      data = {
-        token: login
-      }
-      resource = password
+      zp.on('/meta/handshake', (message) => {
+        if (message.successful) {
+          const { token, userId } = message.ext.authentication
+          this._token = token
+          this._userId = userId
+        }
+      })
     }
+    getConnectionData(login, password, resource = null) {
+      const action = 'authenticate'
+      const type = this._authType
+      let data = { login, password }
 
-    return {
-      ext: {
-        authentication: { action, type, resource, data }
+      // If parameters == 2, the first parameter is a connection token
+      if (null === resource) {
+        data = {
+          token: login
+        }
+        resource = password
+      }
+
+      return {
+        ext: {
+          authentication: { action, type, resource, data }
+        }
       }
     }
+    getUserId() {
+      return this._userId
+    }
+    getToken() {
+      return this._token
+    }
   }
-  getUserId() {
-    return this._userId
-  }
-  getToken() {
-    return this._token
-  }
-}
 
-zp.authent.Simple = SimpleAuthentification
+  zp.authent.Simple = SimpleAuthentification
+}(window.zp))
