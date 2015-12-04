@@ -1,26 +1,42 @@
 {
-  "name": "zetapush-js",
-  "version": "1.1.9",
+  "name": "zetapush",
+  "version": "2.0.0",
   "description": "",
-  "homepage": "zetapush.com",
-  "bugs": "",
-  "keywords": [],
-  "contributors": [
-    "Mikael Morvan"
+  "main": "./dist/zetapush.js",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist"
   ],
+  "scripts": {},
+  "keywords": [
+    "zetapush",
+    "realtime",
+    "serverless",
+    "no-backend",
+    "websocket"
+  ],
+  "contributors": [
+    "Mikael Morvan",
+    "Grégory Houllier"
+  ],
+  "homepage": "http://zetapush.com",
+  "bugs": "https://github.com/zetapush/zetapush-js/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/zetapush/zetapush-js.git"
   },
-  "dependencies": {
-    "gulp": "^3.8.11",
-    "gulp-concat": "~2.4.1",
-    "gulp-notify": "~2.0.0",
-    "gulp-rename": "~1.2.0",
-    "gulp-uglify": "~1.0.1"
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.3.13",
+    "babel-eslint": "^4.1.6",
+    "babel-polyfill": "^6.3.13",
+    "babel-preset-es2015": "^6.3.13",
+    "eslint": "^1.10.3",
+    "gulp": "^3.9.0"
   },
-  "devDependencies": {},
-  "scripts": {
-    "start": "gulp & open dist/index.html"
-  }
+  "engines": {
+    "node": "^4.1.0"
+  },
+  "license": "MIT"
 }
