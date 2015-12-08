@@ -25,6 +25,7 @@ const VENDOR_FILES = [
 ]
 
 const SOURCE_FILES = [
+  `src/legacy/cometd.js`,
   `src/zetapush.js`,
   `src/generic.js`,
   `src/authentication/simple.js`,
