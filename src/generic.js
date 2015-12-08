@@ -1,34 +1,34 @@
 /*
   ZetaPush Generic Service Class v1.0
-  Grégory Houllier - 2015
+  Mickael Morvan, Grégory Houllier - 2015
 */
-(function(zp) {
+;(function(zp) {
   /**
    * @class GenericService
    */
-  class GenericService {
+  class ZetaPushService {
     constructor(deploymentId) {
-      this._deploymentId = deploymentId
-      this._subscribeKeyArray = []
+      this.deploymentId = deploymentId
+      this.subscriptions = []
     }
     on(verb, callback) {
-      return zp.on(zp.generateChannel(this._deploymentId,verb), callback)
+      return zp.on(zp.generateChannel(this.deploymentId, verb), callback)
     }
     off(value) {
       return zp.off(value)
     }
     send(verb, objectParam) {
-      zp.send(zp.generateChannel(this._deploymentId,verb), objectParam)
+      zp.send(zp.generateChannel(this.deploymentId, verb), objectParam)
     }
     onError(callback) {
-      this._subscribeKeyArray.push(this.on('error', callback))
+      this.subscriptions.push(this.on('error', callback))
     }
     releaseService() {
-      this._subscribeKeyArray.forEach((value, key) => {
+      this.subscriptions.forEach((value, key) => {
         this.off(value);
       })
     }
   }
 
-  zp.service.Generic = GenericService
+  zp.service.Generic = ZetaPushService
 }(window.zp))

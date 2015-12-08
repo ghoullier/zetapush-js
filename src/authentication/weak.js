@@ -2,7 +2,7 @@
   ZetaPush Weak Authentication Class v1.0
   Grégory Houllier - 2015
 */
-(function(zp) {
+;(function(zp) {
   /**
    * @class WeakAuthentification
    */
