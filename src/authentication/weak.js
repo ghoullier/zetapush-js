@@ -11,22 +11,22 @@
       this._deploymentId = deploymentId
       this._authType = `${zp.getBusinessId()}.${_deploymentId}.weak`
 
-      zp.on('/meta/handshake', (message) => {
-        if (message.successful) {
-          const { publicToken, token, userId } = message.ext.authentication
+      zp.on('/meta/handshake', ({ ext, successful }) => {
+        if (successful) {
+          const { publicToken, token, userId } = ext.authentication
           this._publicToken = publicToken
           this._token = token
           this._userId = userId
         }
       })
 
-      zp.on(zp.generateChannel(_deploymentId, 'control'), (message) => {
+      zp.on(zp.generateChannel(_deploymentId, 'control'), () => {
         if (zp.isConnected(_authType)) {
           zp.reconnect()
         }
       })
 
-      zp.on(zp.generateChannel(_deploymentId, 'release'), (message) => {
+      zp.on(zp.generateChannel(_deploymentId, 'release'), () => {
         if (zp.isConnected(_authType)) {
           zp.reconnect()
         }
