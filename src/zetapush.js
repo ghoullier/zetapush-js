@@ -9,7 +9,7 @@
   const qwest = window.qwest
 
   const SERVERS_LIST = []
-  const DEFAULT_API_URL = 'http://api.zpush.io/'
+  const DEFAULT_API_URL = 'https://api.zpush.io/'
 
   function getRandomIndex(length) {
     return Math.floor(Math.random() * length)
@@ -33,6 +33,7 @@
           data.lastBusinessId = businessId
           SERVERS_LIST.push.apply(SERVERS_LIST, data.servers);
           const server = data.servers[getRandomIndex(data.servers.length)]
+
           resolve(server);
         }, (error) => {
           log.error(`Error retrieving server url list for businessId: ${businessId}`)
@@ -206,12 +207,12 @@
         this.subscriptions.push(key)
       }
       else {
-        throw "zetaPush.on - bad arguments"
+        throw 'zetaPush.on - bad arguments'
       }
 
-      var tokens = key.channel.split("/")
+      var tokens = key.channel.split('/')
       if (tokens.length <= 1) {
-        cometd.notifyListeners('/meta/error', "Syntax error in the channel name")
+        cometd.notifyListeners('/meta/error', 'Syntax error in the channel name')
         return null
       }
 
@@ -232,7 +233,7 @@
         key.sub = cometd.addListener(key.channel, key.callback)
       }
       else {
-        log.error("This event can t be managed by ZetaPush", evt)
+        log.error('This event can t be managed by ZetaPush', evt)
         return null
       }
       if (key.renewOnReconnect == null) {
@@ -253,9 +254,9 @@
         sendData = data;
       }
 
-      var tokens = evt.split("/")
+      var tokens = evt.split('/')
       if (tokens.length <= 1) {
-        cometd.notifyListeners('/meta/error', "Syntax error in the channel name")
+        cometd.notifyListeners('/meta/error', 'Syntax error in the channel name')
         return
       }
 
