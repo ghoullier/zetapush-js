@@ -4,28 +4,65 @@
 */
 ;(function(zp) {
   /**
-   * @class GenericService
+   * @class ZetaPushService
    */
   class ZetaPushService {
+    /**
+     * @constructor
+     * @param String deploymentId
+     */
     constructor(deploymentId) {
       this.deploymentId = deploymentId
       this.subscriptions = []
     }
+    /**
+     * Add subscription for a specific verb
+     * @param String verb
+     * @param Function callback
+     * @return Object subscription
+     */
     on(verb, callback) {
-      return zp.on(zp.generateChannel(this.deploymentId, verb), callback)
+      const channel = zp.generateChannel(this.deploymentId, verb)
+      const subscription = zp.on(channel, callback)
+
+      this.subscriptions.push(subscription)
+
+      return subscription
     }
-    off(value) {
-      return zp.off(value)
+    /**
+     * Unsubscribe ZetaPush subscription
+     * @param Object subscription
+     * @return void
+     */
+    off(subscription) {
+      return zp.off(subscription)
     }
-    send(verb, objectParam) {
-      zp.send(zp.generateChannel(this.deploymentId, verb), objectParam)
+    /**
+     * Send message for a specific verb
+     * @param String verb
+     * @param Object params
+     * @return void
+     */
+    send(verb, params = {}) {
+      const channel = zp.generateChannel(this.deploymentId, verb)
+
+      zp.send(channel, params)
     }
+    /**
+     * Shortcut to handle error
+     * @param Function callback
+     * @return Object subscription
+     */
     onError(callback) {
-      this.subscriptions.push(this.on('error', callback))
+      return this.on('error', callback)
     }
+    /**
+     * Unsubscribe all ZetaPush subscriptions
+     * @return void
+     */
     releaseService() {
-      this.subscriptions.forEach((value, key) => {
-        this.off(value);
+      this.subscriptions.forEach((subscription) => {
+        this.off(subscription)
       })
     }
   }
