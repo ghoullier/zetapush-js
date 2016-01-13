@@ -8,13 +8,18 @@
     "LICENSE",
     "dist"
   ],
-  "scripts": {},
+  "scripts": {
+    "prebuild": "npm install",
+    "build": "gulp build"
+  },
   "keywords": [
     "zetapush",
+    "push",
     "realtime",
+    "websocket",
+    "cometd",
     "serverless",
-    "no-backend",
-    "websocket"
+    "no-backend"
   ],
   "contributors": [
     "Mikael Morvan",
